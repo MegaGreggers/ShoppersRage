@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Scenes/Shopper'sMayhem.unity
+  isLoaded: 1
+  isActive: 1

@@ -1,0 +1,77 @@
+"RageMart: Grocery Havoc"
+"Frustration Frenzy: Grocery Grab"
+"Cart Clash: Angry Shopper Edition"
+"TemperMart: Turbo Shopping Spree"
+"Grocery Grouch: Supermarket Showdown"
+"Angry Aisles: Frenzied Food Frenzy"
+"CartRage: Furious Grocery Run"
+"FuryMart: Rampaging Shopping Spree"
+"Outburst Oasis: Supermarket Fury"
+"MadMart: Turbocharged Grocery Grab"
+"Cart Catastrophe: Furious Food Frenzy"
+"MadMart Mayhem
+Clash of Carts: Shoppers Rage
+TemperMart: Turbo Shopping Spree
+
+
+Only ONE item should be glowing at a time (Grocery,Cart or other interactible)
+Groceries take priority over Carts when grabbing - if mashing x, all groceries will be picked up then all dumped in the cart
+
+
+Game Modes:
+Shopping List:
+	Flow
+		- you've just exited your car, shopping list in hand - Grab a Cart!!
+		- your shopping list moves into view whenever you stand still
+		- the grocery item closest to you in the super market wi
+	- get all the items on your list in the cart and get them to the checkout as fast as possible.
+	- bumping into too many NPCs will increase your anger meter and you'll lose your temper
+		- this causes you to speed forward smashing through anything in your way, which COULD help, but will likely cause you to crash and knock all the groceries out of your cart
+	
+		
+	
+	Variation - Black Friday (always angry?)
+		- bigger crowds = more anger
+		- fewer, but larger items to jam in your cart
+		
+Shopping Spree:
+	- get as many items in your cart as possible and get to the checkout asap before time runs out
+	- value of all items is tallied up for a high score
+	
+	
+Clash of Carts (Player vs Ai OR Player vs Player)
+	- 2P versus, fighting over goods to get to the checkout on time
+	
+
+	
+----------------  TASKS --------------
+- proper grocery list and checkouts working
+
+
+UI Tasks
+	Cart Pie Chart
+		- if containing groceries but NOT held by the player - show pie chart to indicate how full cart is
+	Gameplay
+		- Timer and ranking (gold time, silver time, etc.)
+		- (X) Pickup Grocery
+		- (X) Grab Cart
+	Checkout
+		- (Triangle) Checkout - List Incomplete! (check shopping list)
+	Shopping List
+		- Populate on screen shopping list with required groceries
+			- Types
+			- Quantities
+		- Strikethrough collected groceries
+		- Raise/Lower Shopping list on/off screen when Stopped/Moving
+	Start Menu
+	Victory/Results Menu
+
+		
+	
+AI Tasks
+- AI Shoppers Walking
+	- AI Shoppers SHOPPING
+	
+Player Tasks
+- stackable groceries in players arms and in cart (small med and large items)
+	- physics springs between items
