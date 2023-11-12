@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public GameScreens currentGameScreen = GameScreens.Gameplay;
     public GameObject AIShopperPrefab;
 
-    public enum allGroceryTypes { Cheerios, Bananas, Milk, Yogurt, Grapes, Watermelon, Pumpkin };
+    public enum allGroceryTypes { Cheerios, Bananas, Milk, Yogurt, Grapes, Watermelon, Pumpkin, Donut, Diapers, Hotdog, Hamburger };
 
     // [Header("UI Player Directives")]
     public enum UI_PlayerDirectives { Checkout, GrabCart, GrabGrocery, HurryUp };

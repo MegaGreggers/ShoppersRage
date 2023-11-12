@@ -16,8 +16,8 @@ public class PlayerCartController : MonoBehaviour
     public List<GameObject> groceriesInFrontOfPlayer = new List<GameObject>();
     public List<GameObject> groceriesHeldByPlayer = new List<GameObject>();
     public List<GameObject> groceriesStandsInFrontOfPlayer = new List<GameObject>();
-    // let's get the GroceryListManager and store the required  THERE not in this script
-    public List<GameManager.allGroceryTypes> playersGroceryListToCollect = new List<GameManager.allGroceryTypes>();
+    // let's get the GroceryListManager and store the required groceries THERE not in this script
+    // public List<GameManager.allGroceryTypes> playersGroceryListToCollect = new List<GameManager.allGroceryTypes>();
     // public List<GameManager.allGroceryTypes> playersGroceriesInCart = new List<GameManager.allGroceryTypes>();
 
     public List<GameObject> UI_ButtonActionPrompts = new List<GameObject>();
@@ -36,6 +36,7 @@ public class PlayerCartController : MonoBehaviour
     public GameObject rightHandContainer;
     public GameObject leftHandContainer;
     public GameObject groceryBundleContainer;
+    public Interactor interactor;
 
     private float releaseSpeed = 1.5f;
 
@@ -44,7 +45,7 @@ public class PlayerCartController : MonoBehaviour
     private GameObject previousClosestGO;
     
     public GameObject closestCart;
-    public GameObject closestGrocery;
+    // public GameObject closestGrocery;
     public GameObject closestGroceryStand;
 
     private GameObject rightHandGrocery;
@@ -61,6 +62,7 @@ public class PlayerCartController : MonoBehaviour
         // shoppingCart_positionHolder = transform.Find("shoppingCart_positionHolder").gameObject;
         myTriggerVolume = GetComponent<BoxCollider>();
         myPuppet = GetComponent<CharacterPuppet>();
+        interactor = GetComponent<Interactor>();
     }
 
     // Update is called once per frame
@@ -84,39 +86,6 @@ public class PlayerCartController : MonoBehaviour
                 }
             }
         }
-        
-        if (Input.GetButtonDown("X_1"))
-        {
-            if (isHoldingCart)
-            {
-                ReleaseCart();
-                // onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
-            }
-            else if (!isHoldingCart)
-            {
-                if (groceriesInFrontOfPlayer.Count > 0)
-                {
-                    GrabClosestGrocery();
-                    // onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
-                }
-
-                if (cartsInFrontOfPlayer.Count > 0)
-                {
-                    if (!isHoldingGroceries)
-                        GrabClosestCart();
-                    
-                    else if (isHoldingGroceries)
-                    {
-                        PlaceGroceriesInClosestCart();
-                        // CheckGroceriesInCartAgainstShoppingList();
-                        if (playerHasAllGroceriesOnList)
-                        {
-                            //TODO: activate UI "get to the checkout!"
-                        }
-                    }
-                }
-            }
-        }
 
         if (Input.GetButtonDown("Y_1"))
         {
@@ -129,70 +98,63 @@ public class PlayerCartController : MonoBehaviour
             {
                 if (isHoldingCart)
                 {
-                    heldCart.GetComponent<ShoppingCart>().EmptyCart();
-                    onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
+                    ReleaseCart();
+                    // heldCart.GetComponent<ShoppingCart>().EmptyCart();
                 }
                 
                 if (groceriesHeldByPlayer.Count > 0)
                 {
                     DropAllGroceries();
-                    onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
                 }
             }
         }
 
         isHoldingGroceries = (groceriesHeldByPlayer.Count > 0) ? true : false;
-    }
-    void GrabClosestGrocery()
+    } 
+    public void GrabGrocery(GameObject closestGrocery)
     {
-        closestGrocery = FindClosestGO(groceriesInFrontOfPlayer);
         closestGrocery.GetComponent<GroceryItem>().thisGrocery.myGlowScript.SetGlow(false);
         closestGrocery.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer = true;
+
+        groceriesHeldByPlayer.Add(closestGrocery);
     
         if (groceriesHeldByPlayer.Count < maxGroceriesHeldByPlayer)
         {
             if (rightHandGrocery == null)
             {
                 rightHandGrocery = closestGrocery;
-                closestGrocery = null;
-
-                groceriesHeldByPlayer.Add(rightHandGrocery);
+                
 
                 ParentPhysicalObjectToPlayer(rightHandGrocery,rightHandContainer.transform);
 
                 isHoldingGroceries = true;
-                groceriesInFrontOfPlayer.Remove(closestGrocery);
-                groceriesInFrontOfPlayer.Remove(rightHandGrocery);
+                interactor.validGroceryColliderList.Remove(closestGrocery.GetComponent<Collider>());
+                closestGrocery = null;
                 return;
             }
 
-            else if (rightHandGrocery != null && leftHandGrocery == null)
+            if (rightHandGrocery != null && leftHandGrocery == null)
             {
                 leftHandGrocery = closestGrocery;
-                closestGrocery = null;
-
-                groceriesHeldByPlayer.Add(leftHandGrocery);
+                
 
                 ParentPhysicalObjectToPlayer(leftHandGrocery, leftHandContainer.transform);
 
                 isHoldingGroceries = true;
-                groceriesInFrontOfPlayer.Remove(closestGrocery);
+                interactor.validGroceryColliderList.Remove(closestGrocery.GetComponent<Collider>());
+                closestGrocery = null;
                 return;
             }
 
-            else if (groceriesHeldByPlayer.Count >= 2)
+            if (groceriesHeldByPlayer.Count >= 2)
             {
-                // create grocery bundle ala Link in BOTW
-
-                groceriesHeldByPlayer.Add(closestGrocery);
+                // TODO: create physical grocery bundle ala Link in BOTW, but a physical wobbling stack
 
                 ParentPhysicalObjectToPlayer(closestGrocery, groceryBundleContainer.transform);
 
                 isHoldingGroceries = true;
-                groceriesInFrontOfPlayer.Remove(closestGrocery);
+                interactor.validGroceryColliderList.Remove(closestGrocery.GetComponent<Collider>());
             }
-
-            groceriesInFrontOfPlayer.Remove(closestGrocery);
         }
         else
         {
@@ -201,57 +163,46 @@ public class PlayerCartController : MonoBehaviour
             return;
         }
     }
-    void PlaceGroceriesInClosestCart()
+    public void PlaceGroceriesInCart(GameObject cartToPlaceGroceriesIn)
     {
-        heldCart = FindClosestGO(cartsInFrontOfPlayer);
-        
-        ShoppingCart shoppingCartScript = heldCart.GetComponent<ShoppingCart>();
+        ShoppingCart shoppingCartScript = interactor.closestInteractible_ShoppingCart.InteractableShoppingCartScript;
 
-        shoppingCartScript.AddGroceryToCart(groceriesHeldByPlayer);
-        GameManager.instance._GroceryListManager.AddAquiredGroceryItems(heldCart.GetComponent<ShoppingCart>().containedGroceryGOs);
+        shoppingCartScript.AddGroceriesToCart(groceriesHeldByPlayer);
+        GameManager.instance._GroceryListManager.AddAquiredGroceryItems(shoppingCartScript.containedGroceryGOs);
         groceriesHeldByPlayer.Clear();
-        
-        // CheckGroceriesInCartAgainstShoppingList();
-        // shoppingCartScript.UpdateCartUI(true, percentageOfGroceriesCollected);
-
-        // onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
 
         rightHandGrocery = null;
         leftHandGrocery = null;
-        closestGrocery = null;
         isHoldingGroceries = false;
     }
     
-    void GrabClosestCart()
+    public void GrabCart(GameObject goCart)
     {
-        heldCart = FindClosestGO(cartsInFrontOfPlayer);
+        heldCart = goCart;
 
         if (heldCart != null)
         {
-            ShoppingCart myTempCart = heldCart.GetComponent<ShoppingCart>();
-            
             GameManager.instance._GroceryListManager.RemovedAllItemsFromCart();
             GameManager.instance._GroceryListManager.AddAquiredGroceryItems(heldCart.GetComponent<ShoppingCart>().containedGroceryGOs);
 
             ParentPhysicalObjectToPlayer(heldCart, shoppingCart_positionHolder.transform);
-
+            interactor.validShoppingCartColliderList.Remove(heldCart.GetComponent<Collider>());
+            
             ikControl.leftHandObj = heldCart.gameObject.transform.Find("L_Hand_IK");
             ikControl.rightHandObj = heldCart.gameObject.transform.Find("R_Hand_IK");
             ikControl.ikActive = true;
 
-            myTriggerVolume.enabled = false;
+            cartsInFrontOfPlayer.Clear();
+
             isHoldingCart = true;
 
-            cartsInFrontOfPlayer.Clear();
-            
-            
             // myTempCart.UpdateCartUI(false,0f);
-            
+
             // Debug.Log("Grabbed a Cart!");
         }
     }
     
-    void ReleaseCart()
+    public void ReleaseCart()
     {
         // cartsInFrontOfPlayer.Clear();
         // Quaternion cartRotation = myCart.transform.rotation;
@@ -269,7 +220,7 @@ public class PlayerCartController : MonoBehaviour
         
         UnParentPhysicalObjectFromPlayer(heldCart);
         heldCart.GetComponent<Rigidbody>().AddForce(transform.forward * releaseSpeed, ForceMode.VelocityChange);
-        myTriggerVolume.enabled = true;
+        
         isHoldingCart = false;
 
         heldCart = null;
@@ -281,17 +232,16 @@ public class PlayerCartController : MonoBehaviour
         foreach (GameObject go in groceriesHeldByPlayer)
         {
             // drop all in bundle container
-            closestGrocery.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer = false;
+            go.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer = false;
             UnParentPhysicalObjectFromPlayer(go);
             go.GetComponent<Rigidbody>().AddForce(transform.forward * releaseSpeed, ForceMode.VelocityChange);
             // groceriesHeldByPlayer.Remove(go);
         }
 
         groceriesHeldByPlayer.Clear();
-        onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
+        // onGroceryCountUpdate.Raise(groceriesHeldByPlayer.Count);
         isHoldingGroceries = false;
-
-        closestGrocery = null;
+        
         rightHandGrocery = null;
         leftHandGrocery = null;
     }
@@ -312,8 +262,7 @@ public class PlayerCartController : MonoBehaviour
             go.transform.SetParent(null);
         }
     GameObject FindClosestGO(List<GameObject> goList)
-    { 
-        
+    {
         previousClosestGO = closestGO;
 
         closestGO = null;
@@ -343,78 +292,24 @@ public class PlayerCartController : MonoBehaviour
 
         return closestGO;
     }
-    /*
-    public void CheckGroceriesInCartAgainstShoppingList()
-    {
-        Debug.Log("CheckGroceriesInCartAgainstShoppingList()"); 
-
-        int numMatches = 0;
-
-        List<GameManager.allGroceryTypes> playersGroceriesInCart = new List<GameManager.allGroceryTypes>();
-
-        List<GameManager.allGroceryTypes> tempPlayersGroceryListToCollect = new List<GameManager.allGroceryTypes>();
-        List<GameManager.allGroceryTypes> tempGroceriesInCart = new List<GameManager.allGroceryTypes>();
-
-        for (int i = 0; i < heldCart.GetComponent<ShoppingCart>().containedGroceryGOs.Count; i++)
-        {
-            playersGroceriesInCart.Add(heldCart.GetComponent<ShoppingCart>().containedGroceryGOs[i].GetComponent<GroceryItem>().thisGrocery.myGroceryType);
-        }
-        
-        // Add grocery list items to temp list
-        for (int i = 0; i < playersGroceryListToCollect.Count; i++)
-        {
-            tempPlayersGroceryListToCollect.Add(playersGroceryListToCollect[i]);
-        }
-        
-        // Add groceries in cart items to temp list
-        for (int i = 0; i < playersGroceriesInCart.Count; i++)
-        {
-            tempGroceriesInCart.Add(playersGroceriesInCart[i]);
-        }
-        
-        for ( int i = 0; i < tempGroceriesInCart.Count; i++ )
-        {
-            if (tempPlayersGroceryListToCollect.Contains(tempGroceriesInCart[i]))
-            {
-                numMatches++;
-                tempPlayersGroceryListToCollect.Remove(tempGroceriesInCart[i]);
-                tempPlayersGroceryListToCollect.TrimExcess();
-            }
-        }
-        
-        if(tempPlayersGroceryListToCollect.Count <= 0)
-        {
-            playerHasAllGroceriesOnList = true;
-            //TODO: enable UI "get your cart to the checkout!"
-        }
-        else
-        {
-            playerHasAllGroceriesOnList = false;
-        }
-
-        percentageOfGroceriesCollected = ((double)numMatches / (double)playersGroceryListToCollect.Count) * 100f;
-        Debug.Log("percentage of groceries in cart: " + percentageOfGroceriesCollected);
-        Debug.Log("numMatches: " + numMatches);
-    }
-
-    */
+    
     
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Grocery") & other.gameObject.GetComponent<GroceryItem>())
-        {
-            if (other.gameObject.GetComponent<GroceryItem>().thisGrocery.isInPlayersCart
-                || other.gameObject.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer
-                || groceriesInFrontOfPlayer.Contains(other.gameObject))
-            {
-                return;
-            }
-            else
-            {
-                groceriesInFrontOfPlayer.Add(other.gameObject);
-                closestGrocery = FindClosestGO(groceriesInFrontOfPlayer);
-            }
-        }
+        // if (other.gameObject.CompareTag("Grocery") & other.gameObject.GetComponent<GroceryItem>())
+        // {
+        //     if (other.gameObject.GetComponent<GroceryItem>().thisGrocery.isInPlayersCart
+        //         || other.gameObject.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer
+        //         || groceriesInFrontOfPlayer.Contains(other.gameObject))
+        //     {
+        //         return;
+        //     }
+        //     else
+        //     {
+        //         groceriesInFrontOfPlayer.Add(other.gameObject);
+        //         closestGrocery = FindClosestGO(groceriesInFrontOfPlayer);
+        //     }
+        // }
 
         if (other.gameObject.CompareTag("ShoppingCart") && !isHoldingCart && !cartsInFrontOfPlayer.Contains(other.gameObject))
         {
@@ -463,12 +358,12 @@ public class PlayerCartController : MonoBehaviour
     
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("Grocery"))
-        {
-            other.GetComponent<ObjectGlow>().SetGlow(false);
-            groceriesInFrontOfPlayer.Remove(other.gameObject);
-            groceriesInFrontOfPlayer.TrimExcess();
-        }
+        // if (other.gameObject.CompareTag("Grocery"))
+        // {
+        //     other.GetComponent<ObjectGlow>().SetGlow(false);
+        //     groceriesInFrontOfPlayer.Remove(other.gameObject);
+        //     groceriesInFrontOfPlayer.TrimExcess();
+        // }
         
         if (other.gameObject.CompareTag("ShoppingCart"))
         {
@@ -483,5 +378,20 @@ public class PlayerCartController : MonoBehaviour
             groceriesStandsInFrontOfPlayer.Remove(other.gameObject);
             groceriesStandsInFrontOfPlayer.TrimExcess();
         }
+    }
+
+    // TODO: OnTriggerStay
+    private void OnTriggerStay(Collider other)
+    {
+        // check if the list of close game objects contains this gameobject, if not add it
+        
+        // find the closest:
+        // Grocery
+        // Shopping Cart
+        // Grocery Stand
+        
+        // determine ACTIVELY CLOSEST OBJECT based on priority, there can be ONLY ONE
+        // HIGHLIGHT GLOW on closest object
+        // Update VERB UI e.g. "X -> Grab Bananas" "X -> Put Bananas in Cart" or "X -> Grab Cart"
     }
 }

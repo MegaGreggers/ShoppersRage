@@ -14,8 +14,7 @@ GameObject:
   - component: {fileID: 1538922685}
   - component: {fileID: 1538922684}
   - component: {fileID: 3210043759727473355}
-  - component: {fileID: 4641741319584240818}
-  - component: {fileID: 191987488}
+  - component: {fileID: 1576699751}
   m_Layer: 16
   m_Name: Bananas
   m_TagString: Grocery
@@ -32,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 1538922683}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -14.634985, y: 0.327, z: 4.988353}
-  m_LocalScale: {x: 88.4407, y: 88.4407, z: 88.44072}
+  m_LocalScale: {x: 88.440735, y: 88.4407, z: 88.44076}
   m_Children:
   - {fileID: 6261649643690783891}
   m_Father: {fileID: 0}
@@ -114,7 +113,9 @@ MonoBehaviour:
     groceryObject: {fileID: 0}
     myGlowScript: {fileID: 0}
     isInPlayersCart: 0
+    isHeldByPlayer: 0
     myGroceryType: 1
+  _prompt: Grab Bananas
 --- !u!114 &3210043759727473355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,20 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b16e489a0827b4da90c875c34a0ac5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!135 &4641741319584240818
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1538922683}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.0021905613
-  m_Center: {x: -0.00006521597, y: 0.00078872655, z: 0.00015988364}
---- !u!54 &191987488
+--- !u!54 &1576699751
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

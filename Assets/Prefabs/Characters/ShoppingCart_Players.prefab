@@ -410,6 +410,8 @@ MonoBehaviour:
   thisCartsCollectedGroceryParent: {fileID: 194152267}
   myGlowScript: {fileID: 0}
   debugTextOffset: {x: 0, y: 0, z: 0}
+  _prompt: Grab Shopping Cart
+  glowObject: {fileID: 0}
 --- !u!114 &6846846278784403586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -625,6 +627,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0388c9ac9d4b8d4ca418560d5eac68f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _uiPanel: {fileID: 0}
+  _promptText: {fileID: 0}
+  IsDisplayed: 0
 --- !u!1 &503811487
 GameObject:
   m_ObjectHideFlags: 0

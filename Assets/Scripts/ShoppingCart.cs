@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class ShoppingCart : MonoBehaviour
+public class ShoppingCart : MonoBehaviour, IInteractable
 {
     public bool showCartUI = false;
     public PieChartControllerSimple thisCartsCompletionPieChart;
@@ -20,11 +20,14 @@ public class ShoppingCart : MonoBehaviour
     Camera cam;
 
     private GameObject nextFreeSlot = null;
+    private Rigidbody rb;
 
     private void Start()
     {
         cam = Camera.main;
 
+        rb = GetComponent<Rigidbody>();
+        
         myGlowScript = GetComponent<ObjectGlow>();
         myGlowScript.SetGlow(false);
 
@@ -37,7 +40,23 @@ public class ShoppingCart : MonoBehaviour
         thisCartsCompletionPieChart.gameObject.SetActive(false);
     }
 
-    public void AddGroceryToCart(List<GameObject> groceries)
+    private void Update()
+    {
+        if (rb.velocity.sqrMagnitude > 0.1f)
+        {
+            // Debug.Log(Vector3.Dot(transform.up, Vector3.down)); 
+            if (Vector3.Dot(transform.up, Vector3.down) > -0.7f)
+            {
+                // Debug.Log("Cart tipped over!");
+                if (containedGroceryGOs.Count > 0)
+                {
+                    EmptyCart();
+                }
+            }
+        }
+    }
+
+    public void AddGroceriesToCart(List<GameObject> groceries)
     {
         foreach(GameObject go in groceries)
         {
@@ -127,8 +146,7 @@ public class ShoppingCart : MonoBehaviour
             }
         }
     }
- 
-
+    
     // just a list of groceries
     // a UI element that displays how complete the cart is compared to players shopping list - probably a PIE CHART!
 
@@ -196,4 +214,36 @@ public class ShoppingCart : MonoBehaviour
         }
     }
     */
+    
+    
+    [SerializeField] private string _prompt;
+    [SerializeField] private ObjectGlow glowObject;
+    public string InteractionPrompt => _prompt;
+    public ObjectGlow InteractionObjectGlowScript => myGlowScript;
+    public ShoppingCart InteractableShoppingCartScript => GetComponent<ShoppingCart>();
+    public GroceryItem InteractableGroceryItemScript => null;
+    public GameObject InteractableGameObject => gameObject;
+    
+    public bool Interact(Interactor interactor)
+    {
+        PlayerCartController playerCartController = interactor.GetComponent<PlayerCartController>();
+        // groceries in front of the player are handled in the Interactor, including the closest grocery
+        if (playerCartController.isHoldingGroceries)
+        { 
+            playerCartController.PlaceGroceriesInCart(gameObject);
+        }
+        if (playerCartController.isHoldingCart)
+        {
+            playerCartController.ReleaseCart();
+        }
+        else if (!playerCartController.isHoldingCart)
+        {
+            playerCartController.GrabCart(gameObject);
+        }
+        
+        
+        
+        Debug.Log("Grabbing a Cart!");
+        return true;
+    }
 }
