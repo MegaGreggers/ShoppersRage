@@ -231,7 +231,9 @@ public class ShoppingCart : MonoBehaviour, IInteractable
         if (playerCartController.isHoldingGroceries)
         { 
             playerCartController.PlaceGroceriesInCart(gameObject);
+            return true;
         }
+        // this doesn't cuerrently make sense as the held shopping cart is exluded from being interactable
         if (playerCartController.isHoldingCart)
         {
             playerCartController.ReleaseCart();
@@ -240,10 +242,9 @@ public class ShoppingCart : MonoBehaviour, IInteractable
         {
             playerCartController.GrabCart(gameObject);
         }
-        
-        
-        
-        Debug.Log("Grabbing a Cart!");
+
+
+        // Debug.Log("Grabbing a Cart!");
         return true;
     }
 }
