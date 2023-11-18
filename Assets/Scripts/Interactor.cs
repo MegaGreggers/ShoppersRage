@@ -155,6 +155,15 @@ public class Interactor : MonoBehaviour
             }
         }
         
+        if (validShoppingCartColliderList.Count == 0)
+        {
+            closestInteractible_ShoppingCart = null;
+        }
+        if (validGroceryColliderList.Count == 0)
+        {
+            closestInteractible_GroceryItem = null;
+        }
+        
         for (int i = 0; i < previousValidGroceryColliderList.Count; i++)
         {
             if(!validGroceryColliderList.Contains(previousValidGroceryColliderList[i]))
@@ -165,11 +174,8 @@ public class Interactor : MonoBehaviour
             if(!validShoppingCartColliderList.Contains(previousValidShoppingCartColliderList[i]))
                 previousValidShoppingCartColliderList[i].GetComponent<ShoppingCart>().myGlowScript.SetGlow(false);
         }
-
-        
         
         Array.Clear(_colliders, 0, 20);
-
     }
 
     private Collider FindClosestCollider(List<Collider> colliders)

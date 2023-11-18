@@ -123,7 +123,6 @@ public class PlayerCartController : MonoBehaviour
             if (rightHandGrocery == null)
             {
                 rightHandGrocery = closestGrocery;
-                
 
                 ParentPhysicalObjectToPlayer(rightHandGrocery,rightHandContainer.transform);
 
@@ -136,7 +135,6 @@ public class PlayerCartController : MonoBehaviour
             if (rightHandGrocery != null && leftHandGrocery == null)
             {
                 leftHandGrocery = closestGrocery;
-                
 
                 ParentPhysicalObjectToPlayer(leftHandGrocery, leftHandContainer.transform);
 
@@ -170,6 +168,8 @@ public class PlayerCartController : MonoBehaviour
         shoppingCartScript.AddGroceriesToCart(groceriesHeldByPlayer);
         GameManager.instance._GroceryListManager.AddAquiredGroceryItems(shoppingCartScript.containedGroceryGOs);
         groceriesHeldByPlayer.Clear();
+        
+        // shoppingCartScript.UpdateCartUI(true, );
 
         rightHandGrocery = null;
         leftHandGrocery = null;

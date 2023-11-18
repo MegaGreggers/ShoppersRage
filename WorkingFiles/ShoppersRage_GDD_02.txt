@@ -1,0 +1,36 @@
+Shoppers Rage
+
+Tasks
+
+
+Tasks Systemic
+- Shopping Cart - Groceries piling up
+
+Features
+	- Frontend
+		- Title Screen
+		- Character Select Screen
+		- Options
+		- Credits
+	
+	- Scoring
+		- Bonze/Silver/Gold trophy per level
+		
+	- Design
+		- Levels
+			- Size & Layout
+			- UX play testing
+		- AI
+			- Tier 1 (MVP)
+				- Characters Milling around store, holding groceries
+				- Security Guard chases player down - game over if caught
+					- get to the checkout fast
+				
+			- Tier 2
+				- Stmble Hit Reactions
+				
+	- Audio
+		- shoppers talking, grunts, screams
+
+Bugs
+- grocery items stay glowing after being touched by the interactor

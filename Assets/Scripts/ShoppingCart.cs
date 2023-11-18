@@ -16,6 +16,7 @@ public class ShoppingCart : MonoBehaviour, IInteractable
     public ObjectGlow myGlowScript;
 
     public Vector3 debugTextOffset = Vector3.zero;
+    public bool _cartIsFull = false;
 
     Camera cam;
 
@@ -36,7 +37,13 @@ public class ShoppingCart : MonoBehaviour, IInteractable
         {
             itemSlotGOs.Add(thisCartsCollectedGroceryParent.transform.GetChild(i).gameObject);
         }
-
+        
+        // Create an instance of the custom comparer
+        GameObjectHeightComparer comparer = new GameObjectHeightComparer();
+        // Sort the list using the custom comparer
+        itemSlotGOs.Sort(comparer);
+        // Now, gameObjectsList is sorted by height from lowest to highest
+        
         thisCartsCompletionPieChart.gameObject.SetActive(false);
     }
 
@@ -60,24 +67,42 @@ public class ShoppingCart : MonoBehaviour, IInteractable
     {
         foreach(GameObject go in groceries)
         {
-            go.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer = false;
-            containedGroceryGOs.Add(go);
-            ParentItemToFreeItemSlot(go);
+            if (!_cartIsFull)
+            {
+                go.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer = false;
+                
+                ParentItemToFreeItemSlot(go);
+            }
+            else
+            {
+                go.GetComponent<GroceryItem>().thisGrocery.isHeldByPlayer = false;
+                ParentItemToFreeItemSlot(go);
+            }
         }
     }
 
     public void ParentItemToFreeItemSlot(GameObject go)
     {
         nextFreeSlot = null;
-
+        
+        // checking for an itemSlot with no grocery parented to it already
         for (int i = 0; i < itemSlotGOs.Count; i++)
         {
-            if(itemSlotGOs[i].transform.childCount == 0)
-            {
-                nextFreeSlot = itemSlotGOs[i];
-            }
+            
             if (nextFreeSlot == null)
+            {
+                if(itemSlotGOs[i].transform.childCount == 0)
+                {
+                    nextFreeSlot = itemSlotGOs[i];
+                }
+            }
+            
+            if (nextFreeSlot == null)
+            {
+                // TODO: UI alert that cart is full? OR let slots be infinite, but will cause cart to tip over
                 Debug.Log("The cart is full!");
+                _cartIsFull = true;
+            }
         }
 
         if(nextFreeSlot != null)
@@ -87,6 +112,7 @@ public class ShoppingCart : MonoBehaviour, IInteractable
             go.GetComponent<Collider>().enabled = false;
             go.GetComponent<Rigidbody>().isKinematic = true;
             go.GetComponent<GroceryItem>().thisGrocery.isInPlayersCart = true;
+            containedGroceryGOs.Add(go);
         }
         else
         {
@@ -98,19 +124,6 @@ public class ShoppingCart : MonoBehaviour, IInteractable
     }
     public void EmptyCart()
     {
-        // foreach(GameObject go in containedGroceryGOs)
-        // {
-        //     go.GetComponent<GroceryItem>().thisGrocery.isInPlayersCart = false;
-        //     
-        //     go.transform.SetParent(null);
-        //     go.GetComponent<Collider>().enabled = true;
-        //     go.GetComponent<Rigidbody>().isKinematic = false;
-        //     go.GetComponent<Rigidbody>().AddForce(transform.up * 6f + new Vector3(-3f,0f,0f) , ForceMode.VelocityChange);
-        //     containedGroceryGOs.Remove(go);
-        //     containedGroceryGOs.TrimExcess();
-        // }
-// 
-        
         for (int i = containedGroceryGOs.Count - 1; i >= 0; i--)
         {
             containedGroceryGOs[i].GetComponent<GroceryItem>().thisGrocery.isInPlayersCart = false;
@@ -124,6 +137,7 @@ public class ShoppingCart : MonoBehaviour, IInteractable
         }
 
         GameManager.instance._GroceryListManager.RemovedAllItemsFromCart();
+        _cartIsFull = false;
     }
 
     public void UpdateCartUI(bool active, float percentage)
@@ -146,74 +160,6 @@ public class ShoppingCart : MonoBehaviour, IInteractable
             }
         }
     }
-    
-    // just a list of groceries
-    // a UI element that displays how complete the cart is compared to players shopping list - probably a PIE CHART!
-
-    /*
-    private GameObject collectedGroceryContainer;
-
-    
-
-    private void Start()
-    {
-        collectedGroceryContainer = gameObject.transform.Find("CollectedGroceries").gameObject;
-    }
-
-    
-    public void PutGroceryInThisCart(GameObject go)
-    {
-        go.GetComponent<Collider>().enabled = false;
-        go.GetComponent<Rigidbody>().isKinematic = true;
-
-        // The following finds empty item transform in cart and assigns it as a parent.
-        
-        for (int i = 0; i < collectedGroceryContainer.transform.childCount; i++)
-        {
-            Transform t = collectedGroceryContainer.transform.GetChild(i);
-
-            if (t.transform.childCount < 1)
-            {
-                go.transform.parent = collectedGroceryContainer.transform.GetChild(i);
-            }
-            if( i == collectedGroceryContainer.transform.childCount)
-            {
-                Debug.Log("Cart is full!");
-            }
-        }
-
-        go.transform.localPosition = Vector3.zero;
-        go.GetComponent<GroceryItem>().thisGrocery.isInPlayersCart = true;
-        containedGroceryGOs.Add(go);
-        CheckItems();
-    }
-
-    void CheckItems()
-    {
-        int itemsRemaining = 0;
-
-        foreach(GameObject g in containedGroceryGOs)
-        {
-            if (g.GetComponent<GroceryItem>().thisGrocery.isInPlayersCart)
-            {
-
-                // update UI!
-            }
-            else
-            {
-                itemsRemaining++;
-            }
-        }
-
-        Debug.Log("There are " + itemsRemaining + " items remaining!");
-
-        if (itemsRemaining == 0)
-        {
-            // playerHasAllGroceries = true;
-            Debug.Log("Get to the Checkout!");
-        }
-    }
-    */
     
     
     [SerializeField] private string _prompt;
@@ -246,5 +192,41 @@ public class ShoppingCart : MonoBehaviour, IInteractable
 
         // Debug.Log("Grabbing a Cart!");
         return true;
+    }
+    
+    public class GameObjectHeightComparer : IComparer<GameObject>
+    {
+        public int Compare(GameObject obj1, GameObject obj2)
+        {
+            // Compare the y positions of the game objects
+            float height1 = obj1.transform.position.y;
+            float height2 = obj2.transform.position.y;
+
+            if (height1 < height2)
+                return -1;
+            else if (height1 > height2)
+                return 1;
+            else
+                return 0;
+        }
+    }
+
+    public class HeightSorter : MonoBehaviour
+    {
+        void SortByHeight()
+        {
+            // Your list of GameObjects
+            List<GameObject> gameObjectsList = new List<GameObject>();
+
+            // Populate your list with game objects
+
+            // Create an instance of the custom comparer
+            GameObjectHeightComparer comparer = new GameObjectHeightComparer();
+
+            // Sort the list using the custom comparer
+            gameObjectsList.Sort(comparer);
+
+            // Now, gameObjectsList is sorted by height from lowest to highest
+        }
     }
 }
